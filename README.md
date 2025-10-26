@@ -409,11 +409,11 @@ This is a demonstration repository, but adaptations and improvements welcome!
 
 -   **anthropic_batch_prompter.py** (129 lines): Anthropic Claude batch API interface with cost estimation
 -   **openai_batch_prompter.py** (151 lines): OpenAI GPT batch API interface with cleanup
--   **rank_social_impact.py** (211 lines): Classification pipeline with enhanced statistics
+-   **rank_social_impact.py** (274 lines): Classification pipeline with enhanced statistics
 -   **example_input.csv**: 60 career summaries spanning 1-5 scale
 -   **requirements.txt**: Pinned dependencies
 
-**Total**: \~491 lines of focused, well-documented code
+**Total**: \~554 lines of focused, well-documented code
 
 ------------------------------------------------------------------------
 
