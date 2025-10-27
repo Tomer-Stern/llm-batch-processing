@@ -58,7 +58,7 @@ This methodology works for any social science text classification task:
 ```         
 anthropic_batch_prompter.py     ← Anthropic Claude batch API handler
 openai_batch_prompter.py        ← OpenAI GPT batch API handler  
-rank_social_impact.py           ← Main classification pipeline with validation
+evaluate_career_histories.py           ← Main classification pipeline with validation
 example_input.csv               ← 60 sample career summaries
 requirements.txt                ← Python dependencies
 ```
@@ -94,7 +94,7 @@ export OPENAI_API_KEY="sk-..."
 ### Validation Mode (Recommended First Step)
 
 ``` bash
-python rank_social_impact.py example_input.csv --compare
+python evaluate_career_histories.py example_input.csv --compare
 ```
 
 **What happens**: 1. Shows cost estimate for both APIs (\~\$0.01 total for example file) 2. Prompts for confirmation before spending money 3. Submits requests to both Anthropic and OpenAI batch APIs 4. Polls every 10 seconds until complete (typically 2-10 minutes) 5. Compares results with statistical rigor
@@ -108,22 +108,22 @@ python rank_social_impact.py example_input.csv --compare
 
 ``` bash
 # Use Anthropic Claude (typically higher quality, slightly more expensive)
-python rank_social_impact.py yourdata.csv --anthropic-batch
+python evaluate_career_histories.py yourdata.csv --anthropic-batch
 
 # Use OpenAI GPT (faster turnaround, lower cost)
-python rank_social_impact.py yourdata.csv --openai-batch
+python evaluate_career_histories.py yourdata.csv --openai-batch
 ```
 
 ### Skip Cost Confirmation (for automation)
 
 ``` bash
-python rank_social_impact.py data.csv --compare --no-confirm
+python evaluate_career_histories.py data.csv --compare --no-confirm
 ```
 
 ### Custom Output Path
 
 ``` bash
-python rank_social_impact.py data.csv --compare --output validation_results.csv
+python evaluate_career_histories.py data.csv --compare --output validation_results.csv
 ```
 
 ------------------------------------------------------------------------
@@ -162,7 +162,7 @@ This example uses a 5-point ordinal scale for social impact orientation:
 4.  **Social-Impact Focused**: Career primarily oriented toward social/environmental benefit
 5.  **Mission-Driven**: Dedicated to social/public benefit, often rejecting commercial alternatives
 
-*Note: You can easily adapt this for your own classification schemes—just modify the `SYSTEM_PROMPT` in `rank_social_impact.py`*
+*Note: You can easily adapt this for your own classification schemes—just modify the `SYSTEM_PROMPT` in `evaluate_career_histories.py`*
 
 ------------------------------------------------------------------------
 
@@ -230,7 +230,7 @@ sample_002,"Another text sample..."
 
 ### 1. Modify the Classification Prompt
 
-Edit `SYSTEM_PROMPT` in `rank_social_impact.py`:
+Edit `SYSTEM_PROMPT` in `evaluate_career_histories.py`:
 
 ``` python
 SYSTEM_PROMPT = """Your classification task description here.
@@ -320,7 +320,7 @@ Real-time status updates during processing:
 ## Comparison to Traditional Methods
 
 | Method | Cost (10K samples) | Time | Consistency | Scale Limit |
-|--------------|------------------|--------------|--------------|--------------|
+|---------------|---------------|---------------|---------------|---------------|
 | Trained RAs | \$10,000 | 3-4 weeks | κ ≈ 0.65-0.75 | 1-2K |
 | Crowdsourcing | \$10,000 | 1 week | κ ≈ 0.45-0.60 | 10-50K |
 | Dictionary methods | Free | 1 hour | Perfect but shallow | Unlimited |
@@ -409,7 +409,7 @@ This is a demonstration repository, but adaptations and improvements welcome!
 
 -   **anthropic_batch_prompter.py** (129 lines): Anthropic Claude batch API interface with cost estimation
 -   **openai_batch_prompter.py** (151 lines): OpenAI GPT batch API interface with cleanup
--   **rank_social_impact.py** (274 lines): Classification pipeline with enhanced statistics
+-   **evaluate_career_histories.py** (274 lines): Classification pipeline with enhanced statistics
 -   **example_input.csv**: 60 career summaries spanning 1-5 scale
 -   **requirements.txt**: Pinned dependencies
 
