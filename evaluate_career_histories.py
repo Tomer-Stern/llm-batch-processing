@@ -91,6 +91,18 @@ def main():
                 row["anthropic_score"] = results["anthropic"].get(str(summary_id))
             if "openai" in results:
                 row["openai_score"] = results["openai"].get(str(summary_id))
+            
+            # Add agreement and difference columns if both scores exist
+            if "anthropic" in results and "openai" in results:
+                anthro_score = results["anthropic"].get(str(summary_id))
+                openai_score = results["openai"].get(str(summary_id))
+                if anthro_score is not None and openai_score is not None:
+                    row["agreement"] = "✓" if anthro_score == openai_score else "✗"
+                    row["difference"] = abs(float(anthro_score) - float(openai_score))
+                else:
+                    row["agreement"] = None
+                    row["difference"] = None
+            
             output_rows.append(row)
         
         output_df = pd.DataFrame(output_rows)
@@ -109,6 +121,7 @@ def compare_results(df):
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy import stats
+    from sklearn.metrics import cohen_kappa_score
     
     print("\n" + "="*70)
     print("COMPARATIVE ANALYSIS: ANTHROPIC vs OPENAI")
@@ -153,6 +166,30 @@ def compare_results(df):
     print(f"Spearman correlation: ρ = {spearman_r:.3f} (p = {spearman_p:.4f})")
     
     # ========================================================================
+    # RELIABILITY COEFFICIENTS (COHEN'S KAPPA)
+    # ========================================================================
+    print("\n\nReliability Coefficients:")
+    print("-" * 50)
+    
+    kappa_unweighted = cohen_kappa_score(anthropic_scores, openai_scores, weights=None)
+    kappa_weighted = cohen_kappa_score(anthropic_scores, openai_scores, weights='quadratic')
+    
+    # Interpret weighted kappa
+    if kappa_weighted > 0.80:
+        interpretation = "Excellent"
+    elif kappa_weighted > 0.60:
+        interpretation = "Substantial"
+    elif kappa_weighted > 0.40:
+        interpretation = "Moderate"
+    elif kappa_weighted > 0.20:
+        interpretation = "Fair"
+    else:
+        interpretation = "Poor"
+    
+    print(f"Cohen's κ (unweighted): {kappa_unweighted:.3f}")
+    print(f"Cohen's κ (weighted):   {kappa_weighted:.3f} [{interpretation}]")
+    
+    # ========================================================================
     # AGREEMENT METRICS
     # ========================================================================
     print("\n\nAgreement Metrics:")
@@ -167,10 +204,21 @@ def compare_results(df):
     print(f"Mean absolute diff:     {abs(differences).mean():.2f}")
     print(f"Mean difference:        {differences.mean():.2f} (Anthropic - OpenAI)")
     
-    # Identify largest disagreements
-    max_diff_idx = abs(differences).idxmax()
-    max_diff = differences[max_diff_idx]
-    print(f"Largest disagreement:   {abs(max_diff):.0f} points (ID: {comparison_df.loc[max_diff_idx, 'id']})")
+    # Identify ALL disagreements for manual review
+    disagreements = comparison_df[differences != 0].copy()
+    disagreements['difference'] = differences[differences != 0]
+    disagreements['abs_difference'] = abs(differences[differences != 0])
+    disagreements = disagreements.sort_values('abs_difference', ascending=False)
+    
+    num_disagreements = len(disagreements)
+    print(f"\n{num_disagreements} disagreements found:")
+    if num_disagreements > 0:
+        print("-" * 70)
+        for idx, row in disagreements.iterrows():
+            summary_preview = row['summary'][:60] + "..." if len(row['summary']) > 60 else row['summary']
+            print(f"  {row['id']:<12} | Anthropic: {int(row['anthropic_score'])} | "
+                  f"OpenAI: {int(row['openai_score'])} | {summary_preview}")
+        print("-" * 70)
     
     # ========================================================================
     # DISTRIBUTION COMPARISON

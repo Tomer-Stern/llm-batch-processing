@@ -91,40 +91,27 @@ export OPENAI_API_KEY="sk-..."
 
 ## Usage
 
-### Validation Mode (Recommended First Step)
+### Running the Classification
 
-``` bash
-python evaluate_career_histories.py example_input.csv --compare
+1.  **Edit the configuration** in `evaluate_career_histories.py`:
+
+``` python
+INPUT_FILE = "example_input.csv"          # Your input CSV file
+OUTPUT_FILE = "output_social_impact.csv"  # Where to save results
+RUN_COMPARISON = True                      # True = both APIs, False = Anthropic only
 ```
 
-**What happens**: 1. Shows cost estimate for both APIs (\~\$0.01 total for example file) 2. Prompts for confirmation before spending money 3. Submits requests to both Anthropic and OpenAI batch APIs 4. Polls every 10 seconds until complete (typically 2-10 minutes) 5. Compares results with statistical rigor
-
-**Output**: `output_social_impact.csv` with columns: - `anthropic_score`: Classification from Claude (1-5) - `openai_score`: Classification from GPT (1-5)\
-- `agreement`: ✓ or ✗ - `difference`: Absolute difference between scores
-
-**Console output includes**: - Cohen's Kappa (inter-rater reliability) - Spearman correlation - Exact agreement percentage - Within-1-point agreement - Score distributions - List of disagreements for manual review
-
-### Production Mode: Single Provider
+2.  **Run the script**:
 
 ``` bash
-# Use Anthropic Claude (typically higher quality, slightly more expensive)
-python evaluate_career_histories.py yourdata.csv --anthropic-batch
-
-# Use OpenAI GPT (faster turnaround, lower cost)
-python evaluate_career_histories.py yourdata.csv --openai-batch
+python evaluate_career_histories.py
 ```
 
-### Skip Cost Confirmation (for automation)
+**What happens**: 1. Shows cost estimate for both APIs (\~\$0.01 total for example file) 2. Prompts for confirmation before spending money 3. Submits requests to Anthropic and/or OpenAI batch APIs 4. Polls every 10 seconds until complete (typically 2-10 minutes) 5. Compares results with statistical rigor (if `RUN_COMPARISON = True`)
 
-``` bash
-python evaluate_career_histories.py data.csv --compare --no-confirm
-```
+**Output**: `output_social_impact.csv` with columns: - `id`: Your record identifier - `summary`: The text that was classified - `anthropic_score`: Classification from Claude (1-5) - `openai_score`: Classification from GPT (1-5) (if comparison enabled) - `agreement`: ✓ or ✗ (if comparison enabled) - `difference`: Absolute difference between scores (if comparison enabled)
 
-### Custom Output Path
-
-``` bash
-python evaluate_career_histories.py data.csv --compare --output validation_results.csv
-```
+**Console output includes**: - Cohen's Kappa (inter-rater reliability) - unweighted and weighted - Spearman correlation - Exact agreement percentage - Within-1-point agreement - Score distributions - Complete list of disagreements for manual review
 
 ------------------------------------------------------------------------
 
@@ -178,7 +165,7 @@ Agreement Metrics:
 
 Reliability Coefficients:
   Cohen's κ (unweighted): 0.789
-  Cohen's κ (weighted): 0.856 [Excellent]
+  Cohen's κ (weighted):   0.856 [Excellent]
 
 Correlation Analysis:
   Spearman's ρ: 0.912 (p=0.0000)
@@ -188,9 +175,11 @@ Score Distributions:
   OpenAI:    Mean=2.93, SD=1.48
 
 10 disagreements found:
+----------------------------------------------------------------------
   person_012   | Anthropic: 3 | OpenAI: 2 | Social entrepreneur building affordable...
   person_025   | Anthropic: 2 | OpenAI: 3 | Supply chain manager optimizing logistic...
   ...
+----------------------------------------------------------------------
 ```
 
 ### Interpretation
@@ -435,4 +424,4 @@ MIT License - Free for research and commercial use
 
 Developed as a demonstration of scalable text analysis methodology for social science research. The specific application (career social impact classification) showcases a labor economics use case, but the approach generalizes to any text classification task across disciplines.
 
-**Author background**: Labor market economist working with large-scale survey and administrative data. This toolkit emerged from the need to efficiently process thousands of open-text survey responses—a common challenge in social science research.=
+**Author background**: Labor market economist working with large-scale survey and administrative data. This toolkit emerged from the need to efficiently process thousands of open-text survey responses—a common challenge in social science research.
